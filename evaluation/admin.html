@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard – IEEE Ignite Project Expo</title>
+    <meta name="description" content="Admin dashboard for managing teams, viewing leaderboards, and scores." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-page" style="font-family:'Inter',sans-serif;" onload="initAdminDashboard()">
+
+    <!-- Mobile sidebar overlay -->
+    <div id="sidebarOverlay" class="hidden fixed inset-0 bg-black/40 z-40 md:hidden" onclick="toggleSidebar()"></div>
+
+    <div class="flex min-h-screen">
+
+        <!-- ═══════════════ SIDEBAR ═══════════════ -->
+        <aside id="sidebar" class="sidebar flex flex-col z-50">
+            <!-- Brand -->
+            <div class="px-5 py-5 flex items-center gap-3 border-b border-white/10">
+                <div class="w-10 h-10 rounded-xl bg-white/15 grid place-items-center flex-shrink-0">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-base leading-tight">IEEE Ignite</h1>
+                    <p class="text-blue-300 text-xs">Admin Panel</p>
+                </div>
+            </div>
+
+            <!-- Nav Links -->
+            <nav class="flex-1 py-4">
+                <a class="sidebar-link active" data-section="addTeam" onclick="showSection('addTeam')"
+                    href="javascript:void(0)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                    </svg>
+                    Add Team
+                </a>
+                <a class="sidebar-link" data-section="attendance" onclick="showSection('attendance')"
+                    href="javascript:void(0)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Attendance
+                </a>
+                <a class="sidebar-link" data-section="leaderboard" onclick="showSection('leaderboard')"
+                    href="javascript:void(0)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Leaderboard
+                </a>
+                <a class="sidebar-link" data-section="viewScores" onclick="showSection('viewScores')"
+                    href="javascript:void(0)">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    View Scores
+                </a>
+            </nav>
+
+            <!-- Logout -->
+            <div class="px-4 pb-5">
+                <button onclick="logout()"
+                    class="w-full flex items-center gap-2 justify-center bg-white/10 hover:bg-white/20 text-white px-4 py-2.5 rounded-lg text-sm font-semibold transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- ═══════════════ MAIN CONTENT ═══════════════ -->
+        <div class="flex-1 flex flex-col min-w-0">
+
+            <!-- Top bar (mobile) -->
+            <header class="md:hidden bg-white shadow-sm px-4 h-14 flex items-center justify-between sticky top-0 z-30">
+                <button onclick="toggleSidebar()" class="p-2 rounded-lg hover:bg-gray-100 transition">
+                    <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+                <span class="font-bold text-gray-800">Admin Dashboard</span>
+                <div class="w-10"></div>
+            </header>
+
+            <div class="flex-1 p-6 md:p-8 lg:p-10 overflow-y-auto">
+
+                <!-- ──────── ADD TEAM ──────── -->
+                <section id="addTeam" class="admin-section">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-extrabold text-gray-800">Add New Team</h2>
+                        <p class="text-gray-500 text-sm mt-1">Register a participating team for the Project Expo</p>
+                    </div>
+
+                    <div class="card p-6 md:p-8 max-w-2xl">
+                        <form id="addTeamForm" onsubmit="submitAddTeam(event)">
+                            <!-- Team Name -->
+                            <div class="mb-5">
+                                <label class="form-label" for="teamName">Team Name</label>
+                                <input id="teamName" type="text" class="form-input" placeholder="e.g. Team Nexus"
+                                    required />
+                            </div>
+                            <!-- Team ID (manual) -->
+                            <div class="mb-5">
+                                <label class="form-label" for="teamCode">Team ID</label>
+                                <input id="teamCode" type="text" class="form-input" placeholder="e.g. TEAM-001" required />
+                                <p class="text-xs text-gray-400 mt-2">Provide a unique ID for judges to identify the team (e.g. TEAM-001)</p>
+                            </div>
+                            <!-- College -->
+                            <div class="mb-5">
+                                <label class="form-label" for="collegeName">College / Institution</label>
+                                <input id="collegeName" type="text" class="form-input"
+                                    placeholder="e.g. MIT College of Engineering" required />
+                            </div>
+                            <!-- Project Title -->
+                            <div class="mb-5">
+                                <label class="form-label" for="projectTitle">Project Title</label>
+                                <input id="projectTitle" type="text" class="form-input"
+                                    placeholder="e.g. AI-Powered Smart Traffic Management" required />
+                            </div>
+                            <!-- Members -->
+                            <div class="mb-6">
+                                <div class="flex items-center justify-between mb-4">
+                                    <label class="form-label" style="margin-bottom: 0;">Team Members</label>
+                                    <button type="button" onclick="addMemberField()" class="btn-outline btn-sm px-4 py-2 flex items-center gap-2" style="font-size: 0.85rem;">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                        </svg>
+                                        Add Member
+                                    </button>
+                                </div>
+                                <div id="membersContainer" class="space-y-3">
+                                    <!-- dynamically populated member fields -->
+                                    <div class="member-field flex gap-3 items-center">
+                                        <input type="text" class="form-input member-input flex-1" placeholder="Enter member name" required />
+                                        <button type="button" onclick="removeMemberField(this)" class="btn-error btn-sm px-3 py-2" style="display: none;">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-400 mt-2">Add each team member in a separate field</p>
+                            </div>
+                            <!-- Submit -->
+                            <div class="flex gap-3">
+                                <button type="submit" class="btn-primary px-6 flex items-center gap-2">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                                    </svg>
+                                    Add Team
+                                </button>
+                                <button type="reset" class="btn-outline">Reset</button>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- ──────── ATTENDANCE ──────── -->
+                <section id="attendance" class="admin-section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-extrabold text-gray-800">Attendance Records</h2>
+                        <p class="text-gray-500 text-sm mt-1">Team member attendance status for all rounds</p>
+                    </div>
+
+                    <!-- Filter -->
+                    <div class="mb-6 flex flex-col sm:flex-row gap-4">
+                        <div class="flex-1">
+                            <label class="form-label" for="attendanceTeamFilter">Filter by Team</label>
+                            <select id="attendanceTeamFilter" class="form-input" onchange="renderAttendance()">
+                                <option value="">— All Teams —</option>
+                            </select>
+                        </div>
+                        <div class="flex-1">
+                            <label class="form-label" for="attendanceRoundFilter">Filter by Round</label>
+                            <select id="attendanceRoundFilter" class="form-input" onchange="renderAttendance()">
+                                <option value="">— All Rounds —</option>
+                                <option value="1">Round 1</option>
+                                <option value="2">Round 2</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="card overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Team Member</th>
+                                        <th class="text-center">Round</th>
+                                        <th class="text-center">Status</th>
+                                        <th>Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="attendanceBody">
+                                    <!-- rendered by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ──────── LEADERBOARD ──────── -->
+                <section id="leaderboard" class="admin-section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-extrabold text-gray-800">Leaderboard</h2>
+                        <p class="text-gray-500 text-sm mt-1">Overall team rankings across all rounds</p>
+                    </div>
+
+                    <!-- Stats Cards -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                        <div class="card p-5 flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-yellow-400 to-orange-500 grid place-items-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-gray-800" id="totalTeamsCount">5</p>
+                                <p class="text-xs text-gray-500 font-medium">Total Teams</p>
+                            </div>
+                        </div>
+                        <div class="card p-5 flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 grid place-items-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-gray-800" id="totalEvaluationsCount">7</p>
+                                <p class="text-xs text-gray-500 font-medium">Evaluations Done</p>
+                            </div>
+                        </div>
+                        <div class="card p-5 flex items-center gap-4">
+                            <div
+                                class="w-12 h-12 rounded-xl bg-gradient-to-br from-emerald-500 to-green-500 grid place-items-center flex-shrink-0">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                                </svg>
+                            </div>
+                            <div>
+                                <p class="text-2xl font-extrabold text-gray-800" id="highestScoreCount">92</p>
+                                <p class="text-xs text-gray-500 font-medium">Highest Score</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th class="w-16 text-center">Rank</th>
+                                        <th>Team Name</th>
+                                        <th>College</th>
+                                        <th class="text-center">Round 1</th>
+                                        <th class="text-center">Round 2</th>
+                                        <th class="text-center">Total</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboardBody">
+                                    <!-- rendered by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ──────── VIEW SCORES ──────── -->
+                <section id="viewScores" class="admin-section hidden">
+                    <div class="mb-6">
+                        <h2 class="text-2xl font-extrabold text-gray-800">Detailed Scores</h2>
+                        <p class="text-gray-500 text-sm mt-1">All evaluation scores submitted by judges</p>
+                    </div>
+
+                    <div class="card overflow-hidden">
+                        <div class="overflow-x-auto">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Team</th>
+                                        <th>Judge</th>
+                                        <th class="text-center">Round</th>
+                                        <th class="text-center">C1</th>
+                                        <th class="text-center">C2</th>
+                                        <th class="text-center">C3</th>
+                                        <th class="text-center">C4</th>
+                                        <th class="text-center">C5</th>
+                                        <th class="text-center">Total</th>
+                                        <th>Remarks</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="scoresBody">
+                                    <!-- rendered by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/supabase-api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>

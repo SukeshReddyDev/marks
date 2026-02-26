@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IEEE Ignite Project Expo – Login</title>
+  <meta name="description" content="Login to the IEEE Ignite Project Expo Evaluation System for judges and administrators." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/styles.css" />
+  <!-- Supabase CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-ieee-gradient min-h-screen flex items-center justify-center p-4" style="font-family:'Inter',sans-serif;">
+
+  <!-- Decorative blurred circles -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none" aria-hidden="true">
+    <div class="absolute -top-32 -left-32 w-96 h-96 bg-white/10 rounded-full blur-3xl"></div>
+    <div class="absolute bottom-0 right-0 w-[500px] h-[500px] bg-cyan-400/10 rounded-full blur-3xl"></div>
+  </div>
+
+  <div class="relative z-10 w-full max-w-md animate-fade-in-up">
+
+    <!-- Logo / Event Badge -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-white/20 backdrop-blur-md mb-4 shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      </div>
+      <h1 class="text-3xl font-extrabold text-white tracking-tight">IEEE Ignite</h1>
+      <p class="text-blue-200 mt-1 text-sm font-medium tracking-wide uppercase">Project Expo Evaluation System</p>
+    </div>
+
+    <!-- Login Card -->
+    <div class="glass-card p-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-6 text-center">Sign In</h2>
+
+      <form id="loginForm" onsubmit="handleLogin(event)" autocomplete="off">
+
+        <!-- Email -->
+        <div class="mb-5">
+          <label class="form-label" for="email">Email Address</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" /></svg>
+            </span>
+            <input id="email" type="email" class="form-input pl-10" placeholder="you@ieee.org" required />
+          </div>
+        </div>
+
+        <!-- Password -->
+        <div class="mb-5">
+          <label class="form-label" for="password">Password</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+            </span>
+            <input id="password" type="password" class="form-input pl-10" placeholder="••••••••" required />
+          </div>
+        </div>
+
+        <!-- Role -->
+        <div class="mb-6">
+          <label class="form-label" for="role">Role</label>
+          <div class="relative">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+            </span>
+            <select id="role" class="form-input pl-10 pr-4 appearance-none cursor-pointer" required>
+              <option value="">Select your role</option>
+              <option value="judge">Judge</option>
+              <option value="admin">Admin</option>
+            </select>
+            <span class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" /></svg>
+            </span>
+          </div>
+        </div>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-primary w-full text-center text-lg py-3 pulse-glow">
+          Sign In
+        </button>
+      </form>
+
+      <p class="text-center text-xs text-gray-400 mt-6">&copy; 2026 IEEE Student Branch. All rights reserved.</p>
+    </div>
+  </div>
+
+  <script src="js/supabase-config.js"></script>
+  <script src="js/supabase-api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

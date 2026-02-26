@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Judge Dashboard – IEEE Ignite Project Expo</title>
+    <meta name="description" content="Judge evaluation dashboard for the IEEE Ignite Project Expo." />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/styles.css" />
+    <!-- Supabase CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="bg-page" style="font-family:'Inter',sans-serif;" onload="initJudgeDashboard()">
+
+    <!-- ═══════════════ HEADER ═══════════════ -->
+    <header class="bg-ieee-gradient shadow-lg sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg bg-white/20 grid place-items-center">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-lg leading-tight">IEEE Ignite Project Expo</h1>
+                    <p class="text-blue-200 text-xs">Judge Evaluation Panel</p>
+                </div>
+            </div>
+            <button onclick="logout()"
+                class="flex items-center gap-2 bg-white/15 hover:bg-white/25 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-all">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+
+        <!-- ═══════════════ ROUND SELECTION ═══════════════ -->
+        <section class="mb-8 animate-fade-in-up">
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Select Round</h2>
+            <div class="flex gap-3">
+                <button class="round-btn btn-outline active px-6 py-2.5" data-round="1" onclick="selectRound(1)">
+                    <span class="mr-1">🏅</span> Round 1
+                </button>
+                <button class="round-btn btn-outline px-6 py-2.5" data-round="2" onclick="selectRound(2)">
+                    <span class="mr-1">🏆</span> Round 2
+                </button>
+            </div>
+        </section>
+
+        <!-- ═══════════════ TEAM SELECTOR ═══════════════ -->
+        <section class="mb-8 animate-fade-in-up" style="animation-delay:0.1s">
+            <h2 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3">Select Team</h2>
+            <select id="teamSelect" class="form-input max-w-md" onchange="loadTeam()">
+                <option value="">— Select a Team —</option>
+            </select>
+        </section>
+
+        <!-- ═══════════════ EVALUATION PANEL ═══════════════ -->
+        <div id="evaluationPanel" class="hidden">
+
+            <!-- Team Details Card -->
+            <section class="card p-6 mb-6">
+                <div class="flex items-start gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-600 to-cyan-500 grid place-items-center flex-shrink-0">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800" id="detailTeamName">—</h3>
+                        <p class="text-xs text-gray-500 mt-0.5" id="detailTeamId">ID: —</p>
+                        <p class="text-sm text-gray-500 mt-0.5" id="detailCollege">—</p>
+                        <p class="text-sm text-blue-600 font-semibold mt-1" id="detailProject">—</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Attendance -->
+            <section class="card p-6 mb-6">
+                <h3 class="text-md font-bold text-gray-800 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                    </svg>
+                    Attendance
+                </h3>
+                <div id="attendanceList" class="space-y-3">
+                    <!-- dynamically populated -->
+                </div>
+            </section>
+
+            <!-- Scoring -->
+            <section class="card p-6 mb-6">
+                <h3 class="text-md font-bold text-gray-800 mb-5 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                    </svg>
+                    Evaluation Criteria
+                    <span class="text-xs text-gray-400 font-normal ml-auto">Each criterion: max 10</span>
+                </h3>
+
+                <div class="space-y-4">
+                    <!-- Criterion 1 -->
+                    <div class="flex items-center justify-between gap-4 px-2">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-700 text-sm">1. Innovation & Originality</p>
+                            <p class="text-xs text-gray-400">Uniqueness and creative value of the idea</p>
+                        </div>
+                        <input id="c1" type="number" min="0" max="10" class="score-input" placeholder="0"
+                            oninput="updateTotal()" />
+                    </div>
+                    <!-- Criterion 2 -->
+                    <div class="flex items-center justify-between gap-4 px-2">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-700 text-sm">2. Technical Complexity</p>
+                            <p class="text-xs text-gray-400">Depth of technical implementation</p>
+                        </div>
+                        <input id="c2" type="number" min="0" max="10" class="score-input" placeholder="0"
+                            oninput="updateTotal()" />
+                    </div>
+                    <!-- Criterion 3 -->
+                    <div class="flex items-center justify-between gap-4 px-2">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-700 text-sm">3. Presentation & Communication</p>
+                            <p class="text-xs text-gray-400">Clarity, delivery, and demo quality</p>
+                        </div>
+                        <input id="c3" type="number" min="0" max="10" class="score-input" placeholder="0"
+                            oninput="updateTotal()" />
+                    </div>
+                    <!-- Criterion 4 -->
+                    <div class="flex items-center justify-between gap-4 px-2">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-700 text-sm">4. Real-World Impact</p>
+                            <p class="text-xs text-gray-400">Practical use-case and societal benefit</p>
+                        </div>
+                        <input id="c4" type="number" min="0" max="10" class="score-input" placeholder="0"
+                            oninput="updateTotal()" />
+                    </div>
+                    <!-- Criterion 5 -->
+                    <div class="flex items-center justify-between gap-4 px-2">
+                        <div class="flex-1">
+                            <p class="font-semibold text-gray-700 text-sm">5. Teamwork & Q&A</p>
+                            <p class="text-xs text-gray-400">Collaboration and handling of questions</p>
+                        </div>
+                        <input id="c5" type="number" min="0" max="10" class="score-input" placeholder="0"
+                            oninput="updateTotal()" />
+                    </div>
+                </div>
+
+                <!-- Total -->
+                <div
+                    class="mt-6 flex items-center justify-between p-4 bg-gradient-to-r from-blue-50 to-cyan-50 rounded-xl">
+                    <span class="font-bold text-gray-700 text-lg">Total Score</span>
+                    <div class="total-badge" id="totalScore">0</div>
+                    <span class="text-sm text-gray-500 font-medium">/ 50</span>
+                </div>
+            </section>
+
+            <!-- Remarks -->
+            <section class="card p-6 mb-6">
+                <h3 class="text-md font-bold text-gray-800 mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                    </svg>
+                    Remarks <span class="text-red-500">*</span>
+                </h3>
+                <textarea id="remarks" class="form-input resize-none" rows="4" maxlength="500"
+                    placeholder="Write your detailed feedback for this team…" oninput="updateCharCount()"></textarea>
+                <p class="text-xs text-gray-400 text-right mt-1" id="charCount">0 / 500</p>
+            </section>
+
+            <!-- Submit -->
+            <div class="flex justify-end mb-12">
+                <button onclick="submitEvaluation(event)" class="btn-success px-8 py-3 text-lg flex items-center gap-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    Submit Evaluation
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/supabase-api.js"></script>
+    <script src="js/app.js"></script>
+</body>
+
+</html>
